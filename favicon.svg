@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="url(#grad)"/>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2E7D32"/>
+      <stop offset="100%" style="stop-color:#4CAF50"/>
+    </linearGradient>
+  </defs>
+  <!-- Layered planning map icon -->
+  <path d="M32 12L14 22l18 10 18-10-18-10z" stroke="white" stroke-width="2" fill="none" stroke-linejoin="round"/>
+  <path d="M14 38l18 10 18-10" stroke="#A5D6A7" stroke-width="2" fill="none" stroke-linejoin="round"/>
+  <path d="M14 30l18 10 18-10" stroke="white" stroke-width="1.5" fill="none" stroke-linejoin="round" opacity="0.6"/>
+</svg>

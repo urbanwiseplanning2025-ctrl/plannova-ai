@@ -1,0 +1,18 @@
+{
+  "name": "plannova-ai-review-center",
+  "version": "1.0.0",
+  "description": "PLANNOVA ARTIFICIAL INTELLIGENCE REVIEW CENTER - DTI Registered - Environmental Planning Licensure Examination Review",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^5.0.0"
+  }
+}
