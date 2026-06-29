@@ -11,7 +11,7 @@ import { useState, useRef, useEffect, createContext, useContext } from "react";
 //   5. Run the SQL in SUPABASE_SETUP.sql to create all tables
 // ═════════════════════════════════════════════════════════════════════════════
 
-const SUPABASE_URL  = "https://ouxnnvltfdbxyodllgko.supabase.co";   
+const SUPABASE_URL  = "https://ouxnnvltfdbxyodllgko.supabase.co";
 const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtY3VnYnpvZnFpdWhvc2NzanZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MzU5MjcsImV4cCI6MjA5ODIxMTkyN30.YNxs6LVQOLijWxOKl9r-drGjuPFTQqwPyGjU4XCeYLE";";                 
 
 // ── Lightweight Supabase client (no npm needed inside Claude artifacts) ───────
