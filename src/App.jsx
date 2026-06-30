@@ -11,8 +11,8 @@ import { useState, useRef, useEffect, createContext, useContext } from "react";
 //   5. Run the SQL in SUPABASE_SETUP.sql to create all tables
 // ═════════════════════════════════════════════════════════════════════════════
 
-const SUPABASE_URL  = "https://ouxnnvltfdbxyodllgko.supabase.co";
-const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtY3VnYnpvZnFpdWhvc2NzanZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MzU5MjcsImV4cCI6MjA5ODIxMTkyN30.YNxs6LVQOLijWxOKl9r-drGjuPFTQqwPyGjU4XCeYLE";";                 
+const SUPABASE_URL  = "https://ouxnnvlfdbxyodllgko.supabase.co";   
+const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91eG5udmx0ZmRieHlvZGxsZ2tvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MjAzNjcsImV4cCI6MjA5ODE5NjM2N30.JBC-Bzi5kORcoWNNf4XDVTmQlLKyJZ3QMr1MRz6TqL0";                  
 
 // ── Lightweight Supabase client (no npm needed inside Claude artifacts) ───────
 const sb = {
@@ -615,6 +615,145 @@ The "answer" is the 0-based index of the correct option. Base questions on Phili
 // ═════════════════════════════════════════════════════════════════════════════
 // MAIN APP
 // ═════════════════════════════════════════════════════════════════════════════
+// ── Announcements Panel — proper React component ───────────────────────────
+function AnnouncementsPanel({ S, textMain, textSub, border, bg1, DM, toast$ }) {
+  const [annList, setAnnList] = useState([
+    { id:1, title:"Enrollment Now Open — 2026 Batch",
+      body:"Secure your slot now! Limited seats available for the 2026 EPLEB Review Batch. Enroll at plannova-ai.vercel.app",
+      date:"Jun 29, 2026", badge:"New", badgeColor:"#2E7D32" },
+    { id:2, title:"🏆 Congratulations 2026 EPLEB Passers!",
+      body:"PLANNOVA is proud to announce our 5 board exam passers including EnP Theodorico M. Collano Jr. — Top 1 Topnotcher!",
+      date:"Jun 28, 2026", badge:"Achievement", badgeColor:"#F9A825" },
+    { id:3, title:"NOVA AI Study Tools Now Live",
+      body:"Access NOVA AI Study Assistant and AI Quiz Generator — free for all enrolled students!",
+      date:"Jun 27, 2026", badge:"Feature", badgeColor:"#1565C0" },
+  ]);
+  const [newTitle, setNewTitle] = useState("");
+  const [newBody,  setNewBody]  = useState("");
+  const [newBadge, setNewBadge] = useState("New");
+  const [saving,   setSaving]   = useState(false);
+  const [editId,   setEditId]   = useState(null);
+
+  const badgeOptions = [
+    { label:"New",         color:"#2E7D32" },
+    { label:"Urgent",      color:"#C62828" },
+    { label:"Reminder",    color:"#E65100" },
+    { label:"Achievement", color:"#F9A825" },
+    { label:"Feature",     color:"#1565C0" },
+    { label:"Schedule",    color:"#6A1B9A" },
+    { label:"General",     color:"#455A64" },
+  ];
+  const getBadgeColor = (label) => badgeOptions.find(b=>b.label===label)?.color||"#2E7D32";
+
+  const saveAnn = () => {
+    if (!newTitle.trim()||!newBody.trim()) { toast$("Please fill in Title and Message","error"); return; }
+    setSaving(true);
+    const today = new Date().toLocaleDateString("en-PH",{year:"numeric",month:"short",day:"numeric"});
+    if (editId) {
+      setAnnList(l=>l.map(a=>a.id===editId?{...a,title:newTitle,body:newBody,badge:newBadge,badgeColor:getBadgeColor(newBadge),date:today}:a));
+      toast$("Announcement updated! ✓"); setEditId(null);
+    } else {
+      setAnnList(l=>[{id:Date.now(),title:newTitle,body:newBody,badge:newBadge,badgeColor:getBadgeColor(newBadge),date:today},...l]);
+      toast$("Announcement posted! ✓");
+    }
+    setNewTitle(""); setNewBody(""); setNewBadge("New"); setSaving(false);
+  };
+  const deleteAnn = (id) => { setAnnList(l=>l.filter(a=>a.id!==id)); toast$("Deleted"); };
+  const editAnn   = (ann) => { setEditId(ann.id); setNewTitle(ann.title); setNewBody(ann.body); setNewBadge(ann.badge); window.scrollTo(0,0); };
+
+  return (
+    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:24, alignItems:"start" }}>
+      {/* FORM */}
+      <div style={{ ...S.card, borderTop:"4px solid #F9A825" }}>
+        <h3 style={{ fontWeight:900, fontSize:18, color:textMain, marginBottom:6 }}>
+          {editId?"✏️ Edit Announcement":"📢 Post New Announcement"}
+        </h3>
+        <p style={{ color:textSub, fontSize:13, marginBottom:20 }}>
+          {editId?"Update this announcement.":"Post a message students will see on their dashboard."}
+        </p>
+        <div style={{ marginBottom:14 }}>
+          <label style={S.label}>Title</label>
+          <input style={S.input} placeholder="e.g. Mock Exam this Saturday!"
+            value={newTitle} onChange={e=>setNewTitle(e.target.value)}/>
+        </div>
+        <div style={{ marginBottom:14 }}>
+          <label style={S.label}>Message / Details</label>
+          <textarea style={{ ...S.input, minHeight:110, resize:"vertical" }}
+            placeholder="Write your announcement here — date, time, venue, or link..."
+            value={newBody} onChange={e=>setNewBody(e.target.value)}/>
+        </div>
+        <div style={{ marginBottom:20 }}>
+          <label style={S.label}>Badge / Category</label>
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:6 }}>
+            {badgeOptions.map(b=>(
+              <button key={b.label} onClick={()=>setNewBadge(b.label)}
+                style={{ background:newBadge===b.label?b.color:"transparent",
+                  color:newBadge===b.label?"#fff":textSub,
+                  border:`2px solid ${newBadge===b.label?b.color:border}`,
+                  borderRadius:99, padding:"5px 14px", cursor:"pointer", fontWeight:700, fontSize:12 }}>
+                {b.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {newTitle && (
+          <div style={{ background:DM?"#1A3A1A":"#F1F8F1", borderRadius:10,
+            padding:"14px 16px", marginBottom:20, borderLeft:"4px solid #F9A825" }}>
+            <div style={{ fontSize:11, fontWeight:700, color:"#888", textTransform:"uppercase", marginBottom:6 }}>Preview</div>
+            <span style={{ background:getBadgeColor(newBadge), color:"#fff",
+              borderRadius:99, padding:"2px 10px", fontSize:10, fontWeight:700 }}>{newBadge}</span>
+            <div style={{ fontWeight:700, fontSize:14, color:textMain, margin:"8px 0 4px" }}>{newTitle}</div>
+            <div style={{ fontSize:12, color:textSub, lineHeight:1.6 }}>{newBody}</div>
+          </div>
+        )}
+        <div style={{ display:"flex", gap:10 }}>
+          <button onClick={saveAnn} disabled={saving}
+            style={{ ...S.btn(true), background:"#F9A825", flex:1, textAlign:"center", padding:13 }}>
+            {saving?"Saving…":editId?"Update Announcement":"📢 Post Announcement"}
+          </button>
+          {editId && <button onClick={()=>{setEditId(null);setNewTitle("");setNewBody("");setNewBadge("New");}}
+            style={{ ...S.btn(false), padding:"13px 18px" }}>Cancel</button>}
+        </div>
+      </div>
+
+      {/* LIST */}
+      <div>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+          <h3 style={{ fontWeight:900, fontSize:18, color:textMain }}>Posted Announcements</h3>
+          <span style={{ background:"#E8F5E9", color:"#2E7D32", borderRadius:99,
+            padding:"4px 14px", fontSize:12, fontWeight:700 }}>{annList.length} active</span>
+        </div>
+        {annList.length===0 ? (
+          <div style={{ ...S.card, textAlign:"center", padding:40 }}>
+            <div style={{ fontSize:40, marginBottom:12 }}>📭</div>
+            <p style={{ color:textSub }}>No announcements yet.</p>
+          </div>
+        ) : annList.map(ann=>(
+          <div key={ann.id} style={{ ...S.card, marginBottom:14, borderLeft:`4px solid ${ann.badgeColor}` }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                <span style={{ background:ann.badgeColor, color:"#fff",
+                  borderRadius:99, padding:"2px 10px", fontSize:10, fontWeight:700 }}>{ann.badge}</span>
+                <span style={{ fontSize:11, color:textSub }}>{ann.date}</span>
+              </div>
+              <div style={{ display:"flex", gap:6 }}>
+                <button onClick={()=>editAnn(ann)}
+                  style={{ background:"#E3F2FD", color:"#1565C0", border:"none",
+                    borderRadius:6, padding:"5px 10px", fontSize:11, fontWeight:700, cursor:"pointer" }}>✏️ Edit</button>
+                <button onClick={()=>deleteAnn(ann.id)}
+                  style={{ background:"#FFEBEE", color:"#C62828", border:"none",
+                    borderRadius:6, padding:"5px 10px", fontSize:11, fontWeight:700, cursor:"pointer" }}>🗑️ Delete</button>
+              </div>
+            </div>
+            <div style={{ fontWeight:800, fontSize:15, color:textMain, marginBottom:6 }}>{ann.title}</div>
+            <div style={{ fontSize:13, color:textSub, lineHeight:1.7 }}>{ann.body}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [page, setPage]           = useState("home");
   const [darkMode, setDark]       = useState(false);
@@ -1769,198 +1908,6 @@ export default function App() {
     );
   };
 
-  // ── Announcements Panel — proper React component ───────────────────────────
-  function AnnouncementsPanel({ S, textMain, textSub, border, bg1, DM, toast$ }) {
-    const [annList, setAnnList] = useState([
-      { id:1, title:"Enrollment Now Open — 2026 Batch",
-        body:"Secure your slot now! Limited seats available for the 2026 EPLEB Review Batch. Enroll at plannova-ai.vercel.app",
-        date:"Jun 29, 2026", badge:"New", badgeColor:"#2E7D32" },
-      { id:2, title:"🏆 Congratulations 2026 EPLEB Passers!",
-        body:"PLANNOVA is proud to announce our 5 board exam passers including EnP Theodorico M. Collano Jr. — Top 1 Topnotcher!",
-        date:"Jun 28, 2026", badge:"Achievement", badgeColor:"#F9A825" },
-      { id:3, title:"NOVA AI Study Tools Now Live",
-        body:"Access NOVA AI Study Assistant and AI Quiz Generator — free for all enrolled students!",
-        date:"Jun 27, 2026", badge:"Feature", badgeColor:"#1565C0" },
-    ]);
-    const [newTitle, setNewTitle] = useState("");
-    const [newBody,  setNewBody]  = useState("");
-    const [newBadge, setNewBadge] = useState("New");
-    const [saving,   setSaving]   = useState(false);
-    const [editId,   setEditId]   = useState(null);
-
-    const badgeOptions = [
-      { label:"New",         color:"#2E7D32" },
-      { label:"Urgent",      color:"#C62828" },
-      { label:"Reminder",    color:"#E65100" },
-      { label:"Achievement", color:"#F9A825" },
-      { label:"Feature",     color:"#1565C0" },
-      { label:"Schedule",    color:"#6A1B9A" },
-      { label:"General",     color:"#455A64" },
-    ];
-
-    const getBadgeColor = (label) =>
-      badgeOptions.find(b => b.label===label)?.color || "#2E7D32";
-
-    const saveAnn = () => {
-      if (!newTitle.trim() || !newBody.trim()) {
-        toast$("Please fill in both Title and Message","error"); return;
-      }
-      setSaving(true);
-      const today = new Date().toLocaleDateString("en-PH",
-        { year:"numeric", month:"short", day:"numeric" });
-      if (editId) {
-        setAnnList(l => l.map(a => a.id===editId
-          ? { ...a, title:newTitle, body:newBody, badge:newBadge,
-              badgeColor:getBadgeColor(newBadge), date:today }
-          : a));
-        toast$("Announcement updated! ✓");
-        setEditId(null);
-      } else {
-        setAnnList(l => [{ id:Date.now(), title:newTitle, body:newBody,
-          badge:newBadge, badgeColor:getBadgeColor(newBadge), date:today }, ...l]);
-        toast$("Announcement posted! Students can now see it ✓");
-      }
-      setNewTitle(""); setNewBody(""); setNewBadge("New");
-      setSaving(false);
-    };
-
-    const deleteAnn = (id) => {
-      setAnnList(l => l.filter(a => a.id!==id));
-      toast$("Announcement deleted");
-    };
-
-    const editAnn = (ann) => {
-      setEditId(ann.id);
-      setNewTitle(ann.title);
-      setNewBody(ann.body);
-      setNewBadge(ann.badge);
-      window.scrollTo(0,0);
-    };
-
-    return (
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:24, alignItems:"start" }}>
-        {/* POST / EDIT FORM */}
-        <div style={{ ...S.card, borderTop:"4px solid #F9A825" }}>
-          <h3 style={{ fontWeight:900, fontSize:18, color:textMain, marginBottom:6 }}>
-            {editId ? "✏️ Edit Announcement" : "📢 Post New Announcement"}
-          </h3>
-          <p style={{ color:textSub, fontSize:13, marginBottom:20 }}>
-            {editId
-              ? "Update this announcement for your students."
-              : "Post a message that all students and reviewees will see on their dashboard."}
-          </p>
-
-          <div style={{ marginBottom:14 }}>
-            <label style={S.label}>Announcement Title</label>
-            <input style={S.input} placeholder="e.g. Mock Exam this Saturday!"
-              value={newTitle} onChange={e => setNewTitle(e.target.value)}/>
-          </div>
-
-          <div style={{ marginBottom:14 }}>
-            <label style={S.label}>Message / Details</label>
-            <textarea style={{ ...S.input, minHeight:110, resize:"vertical" }}
-              placeholder="Write your full announcement here. Include date, time, venue, or link..."
-              value={newBody} onChange={e => setNewBody(e.target.value)}/>
-          </div>
-
-          <div style={{ marginBottom:20 }}>
-            <label style={S.label}>Badge / Category</label>
-            <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:6 }}>
-              {badgeOptions.map(b => (
-                <button key={b.label} onClick={() => setNewBadge(b.label)}
-                  style={{ background:newBadge===b.label ? b.color : "transparent",
-                    color:newBadge===b.label ? "#fff" : textSub,
-                    border:`2px solid ${newBadge===b.label ? b.color : border}`,
-                    borderRadius:99, padding:"5px 14px", cursor:"pointer",
-                    fontWeight:700, fontSize:12 }}>
-                  {b.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {newTitle && (
-            <div style={{ background:DM?"#1A3A1A":"#F1F8F1", borderRadius:10,
-              padding:"14px 16px", marginBottom:20, borderLeft:"4px solid #F9A825" }}>
-              <div style={{ fontSize:11, fontWeight:700, color:"#888",
-                textTransform:"uppercase", marginBottom:6 }}>Preview</div>
-              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                <span style={{ background:getBadgeColor(newBadge), color:"#fff",
-                  borderRadius:99, padding:"2px 10px", fontSize:10, fontWeight:700 }}>
-                  {newBadge}
-                </span>
-              </div>
-              <div style={{ fontWeight:700, fontSize:14, color:textMain, marginBottom:4 }}>
-                {newTitle}
-              </div>
-              <div style={{ fontSize:12, color:textSub, lineHeight:1.6 }}>{newBody}</div>
-            </div>
-          )}
-
-          <div style={{ display:"flex", gap:10 }}>
-            <button onClick={saveAnn} disabled={saving}
-              style={{ ...S.btn(true), background:"#F9A825", flex:1,
-                textAlign:"center", fontSize:15, padding:13 }}>
-              {saving ? "Saving…" : editId ? "Update Announcement" : "📢 Post Announcement"}
-            </button>
-            {editId && (
-              <button onClick={() => { setEditId(null); setNewTitle(""); setNewBody(""); setNewBadge("New"); }}
-                style={{ ...S.btn(false), padding:"13px 18px" }}>Cancel</button>
-            )}
-          </div>
-        </div>
-
-        {/* POSTED ANNOUNCEMENTS LIST */}
-        <div>
-          <div style={{ display:"flex", justifyContent:"space-between",
-            alignItems:"center", marginBottom:16 }}>
-            <h3 style={{ fontWeight:900, fontSize:18, color:textMain }}>
-              Posted Announcements
-            </h3>
-            <span style={{ background:"#E8F5E9", color:"#2E7D32",
-              borderRadius:99, padding:"4px 14px", fontSize:12, fontWeight:700 }}>
-              {annList.length} active
-            </span>
-          </div>
-
-          {annList.length === 0 ? (
-            <div style={{ ...S.card, textAlign:"center", padding:40 }}>
-              <div style={{ fontSize:40, marginBottom:12 }}>📭</div>
-              <p style={{ color:textSub }}>No announcements yet. Post your first one!</p>
-            </div>
-          ) : annList.map(ann => (
-            <div key={ann.id} style={{ ...S.card, marginBottom:14,
-              borderLeft:`4px solid ${ann.badgeColor}` }}>
-              <div style={{ display:"flex", justifyContent:"space-between",
-                alignItems:"flex-start", marginBottom:8 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-                  <span style={{ background:ann.badgeColor, color:"#fff",
-                    borderRadius:99, padding:"2px 10px", fontSize:10, fontWeight:700 }}>
-                    {ann.badge}
-                  </span>
-                  <span style={{ fontSize:11, color:textSub }}>{ann.date}</span>
-                </div>
-                <div style={{ display:"flex", gap:6 }}>
-                  <button onClick={() => editAnn(ann)}
-                    style={{ background:"#E3F2FD", color:"#1565C0", border:"none",
-                      borderRadius:6, padding:"5px 10px", fontSize:11,
-                      fontWeight:700, cursor:"pointer" }}>✏️ Edit</button>
-                  <button onClick={() => deleteAnn(ann.id)}
-                    style={{ background:"#FFEBEE", color:"#C62828", border:"none",
-                      borderRadius:6, padding:"5px 10px", fontSize:11,
-                      fontWeight:700, cursor:"pointer" }}>🗑️ Delete</button>
-                </div>
-              </div>
-              <div style={{ fontWeight:800, fontSize:15, color:textMain, marginBottom:6 }}>
-                {ann.title}
-              </div>
-              <div style={{ fontSize:13, color:textSub, lineHeight:1.7 }}>{ann.body}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   // ════════════════════════════════════════════════════════════════════════════
   // PROGRAMS + CONTACT
