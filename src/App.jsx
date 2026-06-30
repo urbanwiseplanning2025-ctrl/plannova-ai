@@ -11,7 +11,7 @@ import { useState, useRef, useEffect, createContext, useContext } from "react";
 //   5. Run the SQL in SUPABASE_SETUP.sql to create all tables
 // ═════════════════════════════════════════════════════════════════════════════
 
-const SUPABASE_URL  = "https://ouxnnvlfdbxyodllgko.supabase.co";   // ← paste here
+const SUPABASE_URL  = "https://ouxnnvltfdbxyodllgko.supabase.co";   // ← paste here
 const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91eG5udmx0ZmRieHlvZGxsZ2tvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MjAzNjcsImV4cCI6MjA5ODE5NjM2N30.JBC-Bzi5kORcoWNNf4XDVTmQlLKyJZ3QMr1MRz6TqL0";                  // ← paste here
 
 // ── Lightweight Supabase client (no npm needed inside Claude artifacts) ───────
@@ -1903,7 +1903,7 @@ export default function App() {
         )}
 
         {/* ── ANNOUNCEMENTS MANAGEMENT ──────────────────────────────────────── */}
-        {adminTab==="announcements" && <AnnouncementsPanel S={S} textMain={textMain} textSub={textSub} border={border} bg1={bg1} DM={DM} toast$={toast$}/>}
+        {adminTab==="announcements" && <AnnouncementsPanel S={S} textMain={textMain} textSub={textSub} border={border} bg1={bg1} DM={DM} toast$={showToast}/>}
       </div>
     );
   };
